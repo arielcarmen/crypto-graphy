@@ -1,29 +1,25 @@
-import java.security.KeyPair;
-import java.util.Scanner;
+import com.google.gson.GsonBuilder;
+import entities.Block;
 
-import static hash.KeyPairGenerate.generateKeyPair;
-import static hash.SHA256Hasher.hashMessage;
+import java.security.*;
+import java.security.spec.ECGenParameterSpec;
+import java.util.Date;
+import java.util.ArrayList;
+import java.util.Base64;
 
+// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
+// then press Enter. You can now see whitespace characters in your code.
 public class Main {
+
+    public static ArrayList<Block> blockchain = new ArrayList<Block>();
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String message;
+        blockchain.add(new Block("First block", "0"));
+        blockchain.add(new Block("Second block", blockchain.get(blockchain.size() - 1).hash));
+        blockchain.add(new Block("Third block", blockchain.get(blockchain.size() - 1).hash));
 
-        System.out.println("Mesage à hasher: ");
-        message = sc.nextLine();
-
-        System.out.println(hashMessage(message));
-
-        // Générer une paire de clés
-        KeyPair keyPair = generateKeyPair();
-
-        // Récupérer la clé publique et privée
-        System.out.println("Génération des clés...");
-        if (keyPair != null) {
-            System.out.println("Clé publique: " + keyPair.getPublic());
-            System.out.println("Clé privée: " + keyPair.getPrivate());
-        }
-
+        String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
+        System.out.println(blockchainJson);
     }
+
 
 }
