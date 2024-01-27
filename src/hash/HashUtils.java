@@ -109,5 +109,8 @@ public class HashUtils {
         return true;
     }
 
+    public static String keyToString(Key key){
+        return Base64.
+    }
 
 }
