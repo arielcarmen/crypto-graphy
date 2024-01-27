@@ -12,13 +12,21 @@ import java.util.Base64;
 public class Main {
 
     public static ArrayList<Block> blockchain = new ArrayList<Block>();
+
+    public static int difficulty = 5;
+
     public static void main(String[] args) {
-        blockchain.add(new Block("First block", "0"));
-        blockchain.add(new Block("Second block", blockchain.get(blockchain.size() - 1).hash));
-        blockchain.add(new Block("Third block", blockchain.get(blockchain.size() - 1).hash));
+        addBlock(new Block("First block", "0"));
+        addBlock(new Block("Second block", blockchain.get(blockchain.size() - 1).hash));
+        addBlock(new Block("Third block", blockchain.get(blockchain.size() - 1).hash));
 
         String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
         System.out.println(blockchainJson);
+    }
+
+    public static void addBlock(Block newBlock) {
+        newBlock.mineBlock(difficulty);
+        blockchain.add(newBlock);
     }
 
 
