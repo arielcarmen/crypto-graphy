@@ -1,14 +1,19 @@
 package entities;
 
-import hash.HashUtils;
-
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Wallet {
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
+    public PrivateKey privateKey;
+    public PublicKey publicKey;
+    public HashMap<String, OutputTransaction> walletUTXOs = new HashMap<String, OutputTransaction>();
 
+    public Wallet(){
+        generateKeyPair();
+    }
     public void generateKeyPair() {
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA","BC");
@@ -25,4 +30,46 @@ public class Wallet {
             throw new RuntimeException(e);
         }
     }
+
+    public float balance(){
+        float balance = 0;
+        for (Map.Entry<String, OutputTransaction> out: Blockchain.UTXOs.entrySet()
+             ) {
+            OutputTransaction utxo = out.getValue();
+            if (utxo.transactionIsMine(publicKey)){
+                walletUTXOs.put(utxo.id, utxo);
+                balance += utxo.value;
+            }
+        }
+        return balance;
+    }
+
+    public Transaction sendMoney(float value, PublicKey recipient){
+        if (balance() < value){
+            System.out.println("Fonds insuffisants");
+            return null;
+        }
+
+        float somme = 0;
+
+        ArrayList<InputTransaction> inputs = new ArrayList<InputTransaction>();
+        for (Map.Entry<String, OutputTransaction> out: walletUTXOs.entrySet()
+        ) {
+            OutputTransaction utxo = out.getValue();
+            inputs.add(new InputTransaction(utxo.id));
+            somme += utxo.value;
+            if (somme >= value) break;
+        }
+
+        Transaction newTransaction = new Transaction(publicKey, recipient, value, inputs);
+        newTransaction.generateSignature(privateKey);
+        for (InputTransaction i: inputs
+        ) {
+            walletUTXOs.remove(i.utxo.id);
+        }
+
+        return newTransaction;
+    }
+
+
 }

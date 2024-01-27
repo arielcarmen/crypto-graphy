@@ -1,6 +1,6 @@
 package entities;
 
-import hash.HashUtils;
+import hash.BlockchainUtils;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -24,31 +24,73 @@ public class Transaction {
     }
 
     public void generateSignature(PrivateKey privateKey){
-        String data = HashUtils.keyToString(sender) +
-                HashUtils.keyToString(recipient) +
+        String data = BlockchainUtils.keyToString(sender) +
+                BlockchainUtils.keyToString(recipient) +
                 Float.toString(value) +
                 Long.toString(timestamp);
 
-        signature = HashUtils.applyECDSASig(privateKey, data);
+        signature = BlockchainUtils.applyECDSASig(privateKey, data);
     }
 
     public boolean verifySignature(){
-        String data = HashUtils.keyToString(sender) +
-                HashUtils.keyToString(recipient) +
+        String data = BlockchainUtils.keyToString(sender) +
+                BlockchainUtils.keyToString(recipient) +
                 Float.toString(value) +
                 Long.toString(timestamp);
 
-        return HashUtils.verifyECDSASig(sender, data, signature);
+        return BlockchainUtils.verifyECDSASig(sender, data, signature);
     }
 
     public String calculateHash(){
 
-        return HashUtils.applySha256(data);
+        return BlockchainUtils.applySha256(data);
     }
 
     public boolean processTransaction(){
-        if (verifySignature()){
+        if (!verifySignature()){
+            System.out.println("Bad signature");
+            return  false;
+        }
 
-        } el
+        for (InputTransaction input: inputs
+             ) {
+            input.utxo = Blockchain.UTXOs.get(input.outputTransactionId);
+        }
+
+        if (calculateInputValue() < value){
+            System.out.println("Solde insuffisant");
+        }
+
+        if (calculateInputValue() == value) {
+            outputs.add(new OutputTransaction(recipient, value, transactionId));
+        } else {
+            float leftover = calculateInputValue() - value;
+            outputs.add(new OutputTransaction(recipient, value, transactionId));
+            outputs.add(new OutputTransaction(sender, leftover, transactionId));
+        }
+
+        for (OutputTransaction o: outputs
+             ) {
+            Blockchain.UTXOs.put(o.id, o);
+        }
+
+        for (InputTransaction i: inputs
+             ) {
+            if (i.utxo == null) continue;
+            Blockchain.UTXOs.remove(i.utxo.id);
+        }
+
+        return true;
+    }
+
+    public float calculateInputValue(){
+        float total = 0;
+
+        for(InputTransaction i: inputs){
+            if (i.utxo == null) continue;
+            total += i.utxo.value;
+        }
+
+        return total;
     }
 }

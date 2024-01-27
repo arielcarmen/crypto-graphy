@@ -1,6 +1,6 @@
 package entities;
 
-import hash.HashUtils;
+import hash.BlockchainUtils;
 
 import java.security.PublicKey;
 
@@ -14,8 +14,8 @@ public class OutputTransaction{
         this.recipient = recipient;
         this.value = value;
         this.parentTransactionId = parentTransactionId;
-        this.id = HashUtils.applySha256(
-                HashUtils.keyToString(recipient) +
+        this.id = BlockchainUtils.applySha256(
+                BlockchainUtils.keyToString(recipient) +
                         Float.toString(value) +
                         parentTransactionId
         );

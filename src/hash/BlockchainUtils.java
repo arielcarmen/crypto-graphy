@@ -6,9 +6,8 @@ import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 
-public class HashUtils {
+public class BlockchainUtils {
     public void generateKeyPair() {
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA","BC");

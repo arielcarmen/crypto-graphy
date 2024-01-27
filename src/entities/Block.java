@@ -1,37 +1,35 @@
 package entities;
 
-import com.google.gson.GsonBuilder;
-import hash.HashUtils;
+import hash.BlockchainUtils;
 
 import java.util.ArrayList;
-import java.security.MessageDigest;
 import java.util.Date;
 
 public class Block {
     public String hash;
     public String previousHash;
-    private String data;
-    private long timeStamp;
+    private ArrayList<Transaction> transactions = new ArrayList<Transaction>();
+    private long timestamp;
 
     private int nonce;
 
 
     // Block Constructor.
-    public Block(String data, String previousHash) {
-        this.data = data;
+    public Block(ArrayList<Transaction> transactions, String previousHash) {
+        this.transactions = transactions;
         this.previousHash = previousHash;
-        this.timeStamp = new Date().getTime();
+        this.timestamp = new Date().getTime();
         this.nonce = 0;
         this.hash = calculateHash();
     }
 
     //Calculate new hash based on blocks contents
     public String calculateHash() {
-        String calculatedhash = HashUtils.applySha256(
+        String calculatedhash = BlockchainUtils.applySha256(
                 previousHash +
-                        Long.toString(timeStamp) +
+                        Long.toString(timestamp) +
                         Integer.toString(nonce) +
-                data
+                transactions.toString()
         );
         return calculatedhash;
     }
@@ -44,6 +42,20 @@ public class Block {
             hash = calculateHash();
         }
         System.out.println("Block Mined!!! : " + hash);
+    }
+
+    public boolean addTransaction(Transaction transaction){
+        if (transaction == null){
+            return false;
+        }
+        if (!previousHash.equals("0")){
+            if (transaction.processTransaction()){
+                System.out.println("Echec de traitement");
+                return false;
+            }
+        }
+        transactions.add(transaction);
+        return true;
     }
 
 }
