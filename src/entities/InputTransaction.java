@@ -1,4 +1,4 @@
 package entities;
 
-public class InputTransaction extends Transaction{
+public class InputTransaction{
 }
